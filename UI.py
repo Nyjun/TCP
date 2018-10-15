@@ -1,21 +1,38 @@
 
 import tkinter
+import datetime
 import TCP_FrameReader
 
 from tkinter import *
+from datetime import datetime
+from TCP_FrameReader import *
 
+frameList = []
 
 root = tkinter.Tk()
+mainFrame = Frame(root)
+mainFrame.pack()
+
+def RmFrameButton(frame, button):
+	frameList.remove(frame)
+	button.destroy()
+
+def AddFrameButton(container, frame, title):
+	frame.time = datetime.now().time()
+	frameList.append(frame)
+	fb = Button(container, \
+		text=str(frame.time.hour)+":"+str(frame.time.minute)+" - " + title)
+	fb.config(command=lambda: RmFrameButton(frame, fb))
+	fb.pack(side=BOTTOM)
 
 def FWRead():
 	return None
 def FWSendNew():
 	return None
-def SendFrame():
+def SendFrame(frame, title):
 	return None
 
-mainFrame = Frame(root)
-mainFrame.pack()
+# MENU
 menu = Menu(root)
 menu.add_command(label="Read", command=FWRead)
 menu.add_command(label="Send New", command=FWSendNew)
@@ -23,7 +40,7 @@ menu.add_separator()
 opMenu = Menu(menu, tearoff=0)
 menu.add_cascade(label="Operations", menu=opMenu)
 
-
+# I/O LISTS
 ioFrame = Frame(mainFrame)
 ioFrame.pack(side=LEFT)
 ioLabelFrame = Frame(ioFrame)
@@ -36,7 +53,13 @@ inLF = LabelFrame(ioFrame, height=400, width=200)
 inLF.pack(side=LEFT)
 outLF = LabelFrame(ioFrame, height=400, width=200)
 outLF.pack(side=RIGHT)
+inFrame = Frame(inLF)
+outFrame = Frame(outLF)
 
+AddFrameButton(outFrame, TCPFrame(), "Test")
+print(frameList[0].time)
+
+# FRAME READ/WRITE PANEL
 tcpRWFrame = Frame(mainFrame)
 tcpRWFrame.pack(side=RIGHT)
 
@@ -119,6 +142,9 @@ PL.grid(row=7, column=1, columnspan=3)
 
 sendButton = Button(tcpRWFrame, text="Send", command=SendFrame)
 sendButton.grid(row=8, column=3)
+
+
+
 
 root.config(menu=menu)
 root.mainloop()
