@@ -8,6 +8,7 @@ from datetime import datetime
 from TCP_FrameReader import *
 
 frameList = []
+frameButtonList = []
 
 root = tkinter.Tk()
 mainFrame = Frame(root)
@@ -15,15 +16,18 @@ mainFrame.pack()
 
 def RmFrameButton(frame, button):
 	frameList.remove(frame)
+	frameButtonList.remove(button)
 	button.destroy()
 
 def AddFrameButton(container, frame, title):
 	frame.time = datetime.now().time()
 	frameList.append(frame)
-	fb = Button(container, \
-		text=str(frame.time.hour)+":"+str(frame.time.minute)+" - " + title)
-	fb.config(command=lambda: RmFrameButton(frame, fb))
-	fb.pack(side=BOTTOM)
+	frameButtonList.append(Button(container, height=30, width=150,\
+		text=str(frame.time.hour)+":"+str(frame.time.minute)+" - " + title))
+		
+	#frameButtonList(len(frameButtonList)).config(command=lambda: RmFrameButton(frame,\
+	#	frameButtonList(len(frameButtonList))))
+	#frameButtonList(len(frameButtonList)).pack(side=BOTTOM)
 
 def FWRead():
 	return None
@@ -140,10 +144,85 @@ PLlbl.grid(row=7, column=0)
 PL = Text(tcpRWFrame, bd=3, width=48, height=5)
 PL.grid(row=7, column=1, columnspan=3)
 
-sendButton = Button(tcpRWFrame, text="Send", command=SendFrame)
+class DisplayFrame:
+	def __init__(self):
+		self.tcpframe = TCPFrame()
+
+	def GetTCPFrame(self):
+		return self.tcpframe
+
+	def GetFrame(self):
+		self.tcpframe = TCPFrame()
+		self.tcpframe.sourcePort = src.get()
+		self.tcpframe.destPort = dst.get()
+		self.tcpframe.sequenceNum = seqn.get()
+		self.tcpframe.ackNum = ackn.get()
+		self.tcpframe.dataOffset = dataoff.get()
+		self.tcpframe.reserved = reser.get()
+		self.tcpframe.NS = NS.get()
+		self.tcpframe.CWR = CWR.get()
+		self.tcpframe.ECE = ECE.get()
+		self.tcpframe.URG = URG.get()
+		self.tcpframe.ACK = ACK.get()
+		self.tcpframe.PSH = PSH.get()
+		self.tcpframe.RST = RST.get()
+		self.tcpframe.SYN = SYN.get()
+		self.tcpframe.FIN = FIN.get()
+		self.tcpframe.windowSize = winsz.get()
+		self.tcpframe.checksum = chksum.get()
+		self.tcpframe.urgentPtr = urgptr.get()
+		self.tcpframe.payload = PL.get(1.0, END)
+		#testFrame = frame
+		return self.tcpframe
+
+
+	def SetFrame(self, frame):
+		src.delete(0, END)
+		src.insert(0, frame.sourcePort)
+		dst.delete(0, END)
+		dst.insert(0, frame.destPort)
+		seqn.delete(0, END)
+		seqn.insert(0, frame.sequenceNum)
+		ackn.delete(0, END)
+		ackn.insert(0, frame.ackNum)
+		dataoff.delete(0, END)
+		dataoff.insert(0, frame.dataOffset)
+		reser.delete(0, END)
+		reser.insert(0, frame.reserved)
+		NScb.deselect()
+		if (frame.NS == 1): NScb.select()
+		CWRcb.deselect()
+		if (frame.CWR == 1): CWRcb.select()
+		ECEcb.deselect()
+		if (frame.ECE == 1): ECEcb.select()
+		URGcb.deselect()
+		if (frame.URG == 1): URGcb.select()
+		ACKcb.deselect()
+		if (frame.ACK == 1): ACKcb.select()
+		PSHcb.deselect()
+		if (frame.PSH == 1): PSHcb.select()
+		RSTcb.deselect()
+		if (frame.RST == 1): RSTcb.select()
+		SYNcb.deselect()
+		if (frame.SYN == 1): SYNcb.select()
+		FINcb.deselect()
+		if (frame.FIN == 1): FINcb.select()
+		winsz.delete(0, END)
+		winsz.insert(0, frame.windowSize)
+		chksum.delete(0, END)
+		chksum.insert(0, frame.checksum)
+		urgptr.delete(0, END)
+		urgptr.insert(0, frame.urgentPtr)
+		PL.delete(1.0, END)
+		PL.insert(1.0, frame.payload)
+
+
+displayFrame = DisplayFrame()
+
+sendButton = Button(tcpRWFrame, text="Send", command=lambda: displayFrame.GetFrame())#command=SendFrame)
 sendButton.grid(row=8, column=3)
-
-
+setButton = Button(tcpRWFrame, text="Set", command=lambda: displayFrame.SetFrame(displayFrame.GetTCPFrame()))
+setButton.grid(row=9, column=3)
 
 
 root.config(menu=menu)
